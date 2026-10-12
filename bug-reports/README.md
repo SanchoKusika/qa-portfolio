@@ -12,6 +12,12 @@
 | [BUG-004](BUG-004.md) | [Корзина] Три товара из шести не добавляются в корзину | `problem_user` | Critical | High |
 | [BUG-005](BUG-005.md) | [Каталог] Кнопка Remove в каталоге не удаляет товар из корзины | `problem_user` | Major | Medium |
 | [BUG-006](BUG-006.md) | [Оформление] Ввод в поле Last Name перезаписывает First Name, заказ оформить невозможно | `problem_user` | Blocker | High |
+| [BUG-007](BUG-007.md) | [Каталог] Любая сортировка вызывает системное окно «Sorting is broken!» | `error_user` | Major | Medium |
+| [BUG-008](BUG-008.md) | [Корзина] Три товара не добавляются в корзину, в Console ошибка «Failed to add item to the cart» | `error_user` | Critical | High |
+| [BUG-009](BUG-009.md) | [Каталог] Remove в каталоге не удаляет товар, в Console ошибка «Failed to remove item from cart» | `error_user` | Major | Medium |
+| [BUG-010](BUG-010.md) | [Оформление] Поле Last Name не принимает ввод | `error_user` | Major | High |
+| [BUG-011](BUG-011.md) | [Оформление] Форма пропускает пустое обязательное поле Last Name | `error_user` | Major | Medium |
+| [BUG-012](BUG-012.md) | [Оформление] Кнопка Finish не завершает заказ, в Console TypeError | `error_user` | Blocker | High |
 
 ## Шкала severity
 
