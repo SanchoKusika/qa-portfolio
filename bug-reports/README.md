@@ -6,6 +6,12 @@
 
 | ID | Заголовок | Пользователь | Severity | Priority |
 |---|---|---|---|---|
+| [BUG-001](BUG-001.md) | [Каталог] У всех товаров одно и то же изображение | `problem_user` | Major | High |
+| [BUG-002](BUG-002.md) | [Каталог] Сортировка товаров не применяется | `problem_user` | Major | Medium |
+| [BUG-003](BUG-003.md) | [Каталог] Клик по товару открывает карточку другого товара | `problem_user` | Critical | High |
+| [BUG-004](BUG-004.md) | [Корзина] Три товара из шести не добавляются в корзину | `problem_user` | Critical | High |
+| [BUG-005](BUG-005.md) | [Каталог] Кнопка Remove в каталоге не удаляет товар из корзины | `problem_user` | Major | Medium |
+| [BUG-006](BUG-006.md) | [Оформление] Ввод в поле Last Name перезаписывает First Name, заказ оформить невозможно | `problem_user` | Blocker | High |
 
 ## Шкала severity
 
