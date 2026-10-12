@@ -28,6 +28,9 @@
 | [BUG-020](BUG-020.md) | [Каталог] Каталог открывается около 5 секунд: страницу блокирует синхронный цикл ожидания | `performance_glitch_user` | Major | High |
 | [BUG-021](BUG-021.md) | [Мониторинг] Отчеты об ошибках не доходят до Backtrace: в URL незаполненные UNIVERSE и TOKEN | `locked_out_user` | Major | Medium |
 | [BUG-022](BUG-022.md) | [Логин] Длинное сообщение об ошибке обрезается сверху и снизу | `standard_user` | Minor | Medium |
+| [BUG-023](BUG-023.md) | [Оформление] Можно оформить заказ с пустой корзиной | `standard_user` | Major | Medium |
+| [BUG-024](BUG-024.md) | [Меню] После Reset App State у товаров остаются кнопки Remove | `standard_user` | Minor | Medium |
+| [BUG-025](BUG-025.md) | [Оформление] Нулевая сумма товаров отображается как «$0» без копеек | `standard_user` | Trivial | Low |
 
 ## Шкала severity
 
