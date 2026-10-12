@@ -12,7 +12,26 @@
 | [Чек-лист](checklists/saucedemo-checklist.md) | 70 проверок по 9 разделам, включая сравнение тестовых пользователей |
 | [Тест-кейсы](test-cases/saucedemo-test-cases.md) | 22 тест-кейса: логин, каталог, корзина, оформление заказа, меню |
 | [Тест-дизайн](test-design/README.md) | Классы эквивалентности, граничные значения, таблица решений, диаграмма состояний |
-| [Баг-репорты](bug-reports/README.md) | Дефекты со скриншотами, severity и priority |
+| [Баг-репорты](bug-reports/README.md) | 20 дефектов со скриншотами, логами Console и записью Performance |
+
+## Итоги тестирования
+
+Найдено **20 дефектов** под четырьмя тестовыми пользователями. Под эталонным `standard_user` основной путь проходит без ошибок.
+
+| Severity | Количество | Примеры |
+|---|---|---|
+| Blocker | 2 | Невозможно оформить заказ: ввод в Last Name портит First Name ([BUG-006](bug-reports/BUG-006.md)); Finish падает с `TypeError` ([BUG-012](bug-reports/BUG-012.md)) |
+| Critical | 4 | Цены в каталоге не совпадают с ценами в корзине ([BUG-013](bug-reports/BUG-013.md)); клик по товару открывает другой товар ([BUG-003](bug-reports/BUG-003.md)) |
+| Major | 9 | Каталог зависает на 5 секунд из-за синхронного цикла ожидания ([BUG-020](bug-reports/BUG-020.md)) |
+| Minor | 4 | Кнопка Checkout в корзине уехала в шапку ([BUG-019](bug-reports/BUG-019.md)) |
+| Trivial | 1 | Сдвинутые названия товаров ([BUG-017](bug-reports/BUG-017.md)) |
+
+| Пользователь | Дефектов |
+|---|---|
+| `problem_user` | 6 |
+| `error_user` | 6 |
+| `visual_user` | 7 |
+| `performance_glitch_user` | 1 |
 
 ## Объект тестирования
 
@@ -37,7 +56,7 @@
 
 ## Инструменты
 
-- Chrome DevTools: Console, Network, Application, Device Mode
+- Chrome DevTools: Console (исключения и стек вызовов), Elements (классы и размеры элементов), Performance (запись, Bottom-up, LCP), Sources (поиск причины задержки в коде), Application (localStorage, cookies)
 - Git, GitHub, Markdown, Mermaid
 
 ## Структура репозитория

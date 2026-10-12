@@ -25,6 +25,7 @@
 | [BUG-017](BUG-017.md) | [Каталог] Названия двух товаров сдвинуты вправо | `visual_user` | Trivial | Low |
 | [BUG-018](BUG-018.md) | [Каталог] Кнопка Add to cart у Test.allTheThings() T-Shirt (Red) выходит за край карточки | `visual_user` | Minor | Low |
 | [BUG-019](BUG-019.md) | [Корзина] Кнопка Checkout отображается в правом верхнем углу шапки | `visual_user` | Minor | Medium |
+| [BUG-020](BUG-020.md) | [Каталог] Каталог открывается около 5 секунд: страницу блокирует синхронный цикл ожидания | `performance_glitch_user` | Major | High |
 
 ## Шкала severity
 
