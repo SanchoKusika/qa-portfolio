@@ -4,7 +4,7 @@
 |---|---|
 | Объект | Swag Labs, https://www.saucedemo.com/ (публичная версия на дату тестирования) |
 | Период | 2026-10-12 |
-| Окружение | Windows 11, Google Chrome 155, окно 1920×889; DevTools: Console, Network, Elements, Performance, Sources, Application |
+| Окружение | Windows 11, Google Chrome 155, окно 1920×889; Zen Browser 1.23.2b (Firefox); DevTools: Console, Network, Elements, Performance, Sources, Application |
 | Документы | [Тест-план](test-plan.md), [чек-лист](../checklists/saucedemo-checklist.md), [тест-кейсы](../test-cases/saucedemo-test-cases.md), [баг-репорты](../bug-reports/README.md) |
 
 ## 1. Что проверено
@@ -15,7 +15,7 @@
 | Функциональное | 22 тест-кейса: логин, каталог, карточка товара, корзина, оформление заказа, меню |
 | Сравнительное | Основной путь под `problem_user`, `error_user`, `visual_user`, `performance_glitch_user`, `locked_out_user` в сравнении с `standard_user` |
 | UI | Изображения, выравнивание, расположение элементов, форматы цен, тексты сообщений, видимость фокуса клавиатуры |
-| Чек-лист | 70 проверок: 53 Passed, 13 Failed, 1 вопрос к требованиям, 3 не проверено ([чек-лист](../checklists/saucedemo-checklist.md)) |
+| Чек-лист | 70 проверок: 57 Passed, 13 Failed, 1 вопрос к требованиям ([чек-лист](../checklists/saucedemo-checklist.md)) |
 | Производительность (базово) | Запись Performance и LCP при открытии каталога |
 | Интеграции | Отправка отчетов об ошибках в Backtrace (Network, Console) |
 
