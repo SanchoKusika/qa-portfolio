@@ -31,6 +31,8 @@
 | [BUG-023](BUG-023.md) | [Оформление] Можно оформить заказ с пустой корзиной | `standard_user` | Major | Medium |
 | [BUG-024](BUG-024.md) | [Меню] После Reset App State у товаров остаются кнопки Remove | `standard_user` | Minor | Medium |
 | [BUG-025](BUG-025.md) | [Оформление] Нулевая сумма товаров отображается как «$0» без копеек | `standard_user` | Trivial | Low |
+| [BUG-026](BUG-026.md) | [Оформление] Поля из одних пробелов проходят проверку обязательности | `standard_user` | Major | Medium |
+| [BUG-027](BUG-027.md) | [Доступность] Элемент в фокусе клавиатуры никак не выделяется | `standard_user` | Minor | Medium |
 
 ## Шкала severity
 
