@@ -1,0 +1,1155 @@
+{
+  "info": {
+    "_postman_id": "ecbe68e6-c74d-574f-88d6-1814027029ee",
+    "name": "Swagger Petstore API tests",
+    "description": "API-тесты для https://petstore.swagger.io/v2.\n\nПапки 1–3 проверяют работающее поведение и запускаются в CI.\nПапка 4 содержит тесты на найденные дефекты: они проверяют поведение по спецификации и сейчас падают. Описание дефектов: bug-reports/api.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Pet CRUD",
+      "id": "4bfb84c0-bbf7-5f94-b587-a83580b844b8",
+      "item": [
+        {
+          "name": "Create pet",
+          "id": "ab4edd9a-085b-5bcc-a97a-32a2efd06f64",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "description": "Создает питомца с уникальным id. id и имя сохраняются в переменные коллекции для следующих запросов.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{petId}},\n  \"category\": { \"id\": 1, \"name\": \"Dogs\" },\n  \"name\": \"{{petName}}\",\n  \"photoUrls\": [\"https://example.com/{{petId}}.jpg\"],\n  \"tags\": [{ \"id\": 1, \"name\": \"qa-portfolio\" }],\n  \"status\": \"available\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const petId = 900000000 + Math.floor(Math.random() * 90000000);",
+                  "pm.collectionVariables.set(\"petId\", petId);",
+                  "pm.collectionVariables.set(\"petName\", `qa-portfolio-${petId}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Content-Type is JSON\", () => pm.response.to.have.header(\"Content-Type\", \"application/json\"));",
+                  "pm.test(\"Returned id matches the sent id\", () => pm.expect(body.id).to.eql(pm.collectionVariables.get(\"petId\")));",
+                  "pm.test(\"Returned name matches the sent name\", () => pm.expect(body.name).to.eql(pm.collectionVariables.get(\"petName\")));",
+                  "pm.test(\"Status is available\", () => pm.expect(body.status).to.eql(\"available\"));",
+                  "pm.test(\"Category, photo and tag are saved\", () => {",
+                  "  pm.expect(body.category.name).to.eql(\"Dogs\");",
+                  "  pm.expect(body.photoUrls).to.have.lengthOf(1);",
+                  "  pm.expect(body.tags[0].name).to.eql(\"qa-portfolio\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get pet by id",
+          "id": "22217e26-40d2-5cbb-ba48-9ed3fd127f4b",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/{{petId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "{{petId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const petSchema = {",
+                  "  type: \"object\",",
+                  "  required: [\"id\", \"name\", \"photoUrls\", \"status\"],",
+                  "  properties: {",
+                  "    id: { type: \"integer\" },",
+                  "    name: { type: \"string\" },",
+                  "    photoUrls: { type: \"array\", items: { type: \"string\" } },",
+                  "    tags: { type: \"array\" },",
+                  "    status: { type: \"string\", enum: [\"available\", \"pending\", \"sold\"] }",
+                  "  }",
+                  "};",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Body matches the pet schema\", () => pm.response.to.have.jsonSchema(petSchema));",
+                  "pm.test(\"Pet data matches the created pet\", () => {",
+                  "  pm.expect(body.id).to.eql(pm.collectionVariables.get(\"petId\"));",
+                  "  pm.expect(body.name).to.eql(pm.collectionVariables.get(\"petName\"));",
+                  "  pm.expect(body.status).to.eql(\"available\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update pet",
+          "id": "6b603e72-b3e1-5480-bff0-55f2ef5ad1d0",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{petId}},\n  \"name\": \"{{petName}}-updated\",\n  \"photoUrls\": [\"https://example.com/{{petId}}.jpg\"],\n  \"status\": \"sold\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Name is updated\", () => pm.expect(body.name).to.eql(`${pm.collectionVariables.get(\"petName\")}-updated`));",
+                  "pm.test(\"Status is updated to sold\", () => pm.expect(body.status).to.eql(\"sold\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get updated pet",
+          "id": "f7df777d-2d99-53cb-9033-32cbbe36ee79",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/{{petId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "{{petId}}"
+              ]
+            },
+            "description": "Проверяет, что изменения действительно сохранились, а не только вернулись в ответе на PUT."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Changes are saved on the server\", () => {",
+                  "  pm.expect(body.name).to.eql(`${pm.collectionVariables.get(\"petName\")}-updated`);",
+                  "  pm.expect(body.status).to.eql(\"sold\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Find pets by status sold",
+          "id": "4a3b22c4-8642-5f20-8ca6-765ed5b4807c",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus?status=sold",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByStatus"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "sold"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is a non-empty array\", () => {",
+                  "  pm.expect(body).to.be.an(\"array\");",
+                  "  pm.expect(body.length).to.be.above(0);",
+                  "});",
+                  "pm.test(\"Every pet in the result has status sold\", () => {",
+                  "  body.forEach(pet => pm.expect(pet.status).to.eql(\"sold\"));",
+                  "});",
+                  "pm.test(\"Updated pet is in the result\", () => {",
+                  "  const ids = body.map(pet => pet.id);",
+                  "  pm.expect(ids).to.include(pm.collectionVariables.get(\"petId\"));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete pet",
+          "id": "dbee463c-154b-568c-89b0-5b8ecd47120f",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/{{petId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "{{petId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response message contains the deleted id\", () => {",
+                  "  pm.expect(pm.response.json().message).to.eql(String(pm.collectionVariables.get(\"petId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get deleted pet",
+          "id": "692dfc39-89e6-5743-a477-59b4aa8a3205",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/{{petId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "{{petId}}"
+              ]
+            },
+            "description": "После удаления питомец не должен находиться."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Error message is Pet not found\", () => pm.expect(pm.response.json().message).to.eql(\"Pet not found\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Полный жизненный цикл питомца: создание, чтение, изменение, поиск по статусу, удаление."
+    },
+    {
+      "name": "2. Store",
+      "id": "b74dad87-d48a-5084-97ba-1ae5ffc9374a",
+      "item": [
+        {
+          "name": "Get inventory",
+          "id": "3807ca86-df08-5e3c-ae88-e19d4f3da6ce",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/inventory",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "inventory"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is an object of status counters\", () => {",
+                  "  pm.expect(body).to.be.an(\"object\");",
+                  "  pm.expect(body).to.have.property(\"available\");",
+                  "  Object.values(body).forEach(count => pm.expect(count).to.be.a(\"number\"));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Place order",
+          "id": "ac9f596f-e46a-547a-9b7b-98ba61ebaa91",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "order"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{orderId}},\n  \"petId\": {{petId}},\n  \"quantity\": 2,\n  \"shipDate\": \"2026-10-12T10:00:00.000Z\",\n  \"status\": \"placed\",\n  \"complete\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"orderId\", 900000000 + Math.floor(Math.random() * 90000000));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const orderSchema = {",
+                  "  type: \"object\",",
+                  "  required: [\"id\", \"petId\", \"quantity\", \"status\", \"complete\"],",
+                  "  properties: {",
+                  "    id: { type: \"integer\" },",
+                  "    petId: { type: \"integer\" },",
+                  "    quantity: { type: \"integer\", minimum: 1 },",
+                  "    shipDate: { type: \"string\" },",
+                  "    status: { type: \"string\", enum: [\"placed\", \"approved\", \"delivered\"] },",
+                  "    complete: { type: \"boolean\" }",
+                  "  }",
+                  "};",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Body matches the order schema\", () => pm.response.to.have.jsonSchema(orderSchema));",
+                  "pm.test(\"Order data matches the request\", () => {",
+                  "  pm.expect(body.id).to.eql(pm.collectionVariables.get(\"orderId\"));",
+                  "  pm.expect(body.quantity).to.eql(2);",
+                  "  pm.expect(body.status).to.eql(\"placed\");",
+                  "  pm.expect(body.complete).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get order by id",
+          "id": "989749e1-b79a-5d2e-92c6-c0cc8d09e9cc",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/order/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "order",
+                "{{orderId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Order is found by id\", () => pm.expect(body.id).to.eql(pm.collectionVariables.get(\"orderId\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete order",
+          "id": "85b7c3b4-0164-5809-aa9b-3d69e4a3f2b3",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/order/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "order",
+                "{{orderId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response message contains the deleted id\", () => {",
+                  "  pm.expect(pm.response.json().message).to.eql(String(pm.collectionVariables.get(\"orderId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get deleted order",
+          "id": "d0d4463c-6aac-5ad0-8775-b31793cf3c4a",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/order/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "order",
+                "{{orderId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Error message is Order not found\", () => pm.expect(pm.response.json().message).to.eql(\"Order not found\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Склад и заказы: инвентарь, создание, чтение и удаление заказа."
+    },
+    {
+      "name": "3. Negative",
+      "id": "e8f892f9-907e-55db-b631-96682a7de70f",
+      "item": [
+        {
+          "name": "Get pet with nonexistent id",
+          "id": "536937f7-8539-5651-be7c-e47a85a828bb",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/-1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "-1"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Error message is Pet not found\", () => pm.expect(pm.response.json().message).to.eql(\"Pet not found\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create pet without body",
+          "id": "3023c920-3d2d-5398-9023-8aa1b1b83b3b",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 405 (Invalid input, as in the spec)\", () => pm.response.to.have.status(405));",
+                  "pm.test(\"Pet is not created: no id in the response\", () => pm.expect(pm.response.json()).to.not.have.property(\"id\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create pet with invalid JSON",
+          "id": "23ad440d-82c9-5bf6-83d7-b97af412e612",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "description": "Спецификация обещает 405, сервер возвращает 400 bad input. Оба кода клиентские, поэтому проверяется класс 4xx.",
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"id\": 1, \"name\": ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 4xx\", () => pm.expect(pm.response.code).to.be.within(400, 499));",
+                  "pm.test(\"Pet is not created: no id in the response\", () => pm.expect(pm.response.json()).to.not.have.property(\"id\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete nonexistent pet",
+          "id": "a3b91c43-f51d-501e-9842-05a0adf89057",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/-1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "-1"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get nonexistent order",
+          "id": "657b568d-795a-5d5f-ac70-0975d277767c",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/order/-1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "order",
+                "-1"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Error message is Order not found\", () => pm.expect(pm.response.json().message).to.eql(\"Order not found\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Несуществующие ресурсы и некорректные запросы."
+    },
+    {
+      "name": "4. Known defects",
+      "id": "4003f853-23a0-5c91-8dd1-5471b154cb12",
+      "item": [
+        {
+          "name": "API-BUG-001 Get pet with non-numeric id",
+          "id": "1431d141-1355-555b-8d1d-778c406d0a4f",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "abc"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"[API-BUG-001] Status code is 400 (Invalid ID supplied)\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"[API-BUG-001] Error does not expose Java exception\", () => {",
+                  "  pm.expect(pm.response.text()).to.not.include(\"java.\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-BUG-002 Find pets by invalid status",
+          "id": "ffe2d008-aa3e-5641-9c17-dbab7f9effd9",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus?status=qwerty",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByStatus"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "qwerty"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"[API-BUG-002] Status code is 400 (Invalid status value)\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-BUG-003 Create pet with status outside enum",
+          "id": "04fe8aef-099e-550c-852d-2dc1352e5463",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 999000003,\n  \"name\": \"qa-portfolio-invalid-status\",\n  \"photoUrls\": [],\n  \"status\": \"flying\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"[API-BUG-003] Status code is 405 (Invalid input)\", () => pm.response.to.have.status(405));",
+                  "",
+                  "// Cleanup: if the server created a pet despite invalid data, delete it.",
+                  "// The id is read from the raw text: ids above Number.MAX_SAFE_INTEGER lose precision in JSON.parse",
+                  "const createdId = (pm.response.text().match(/\"id\"\\s*:\\s*(\\d+)/) || [])[1];",
+                  "if (pm.response.code === 200 && createdId) {",
+                  "  pm.sendRequest({ url: `${pm.collectionVariables.get(\"baseUrl\")}/pet/${createdId}`, method: \"DELETE\" });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-BUG-004 Create pet without required fields",
+          "id": "32e565dd-5c5a-5d6b-a7c0-f033d052d090",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"[API-BUG-004] Status code is 405 (Invalid input)\", () => pm.response.to.have.status(405));",
+                  "",
+                  "// Cleanup: if the server created a pet despite invalid data, delete it.",
+                  "// The id is read from the raw text: ids above Number.MAX_SAFE_INTEGER lose precision in JSON.parse",
+                  "const createdId = (pm.response.text().match(/\"id\"\\s*:\\s*(\\d+)/) || [])[1];",
+                  "if (pm.response.code === 200 && createdId) {",
+                  "  pm.sendRequest({ url: `${pm.collectionVariables.get(\"baseUrl\")}/pet/${createdId}`, method: \"DELETE\" });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-BUG-005 Update nonexistent pet",
+          "id": "dd3cd5ae-9541-5a18-b6e3-37911bff1343",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 999000005,\n  \"name\": \"qa-portfolio-ghost\",\n  \"photoUrls\": [],\n  \"status\": \"available\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Precondition: make sure the pet does not exist",
+                  "pm.sendRequest({ url: `${pm.collectionVariables.get(\"baseUrl\")}/pet/999000005`, method: \"DELETE\" });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"[API-BUG-005] Status code is 404 (Pet not found)\", () => pm.response.to.have.status(404));",
+                  "",
+                  "// Cleanup: if the server created a pet despite invalid data, delete it.",
+                  "// The id is read from the raw text: ids above Number.MAX_SAFE_INTEGER lose precision in JSON.parse",
+                  "const createdId = (pm.response.text().match(/\"id\"\\s*:\\s*(\\d+)/) || [])[1];",
+                  "if (pm.response.code === 200 && createdId) {",
+                  "  pm.sendRequest({ url: `${pm.collectionVariables.get(\"baseUrl\")}/pet/${createdId}`, method: \"DELETE\" });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-BUG-006 Place order with negative quantity",
+          "id": "5ec659aa-00fc-5438-9a20-56139570c78b",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "order"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 999000006,\n  \"petId\": 1,\n  \"quantity\": -5,\n  \"status\": \"placed\",\n  \"complete\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"[API-BUG-006] Status code is 400 (Invalid Order)\", () => pm.response.to.have.status(400));",
+                  "",
+                  "// Cleanup: delete the order if it was created",
+                  "if (pm.response.code === 200) {",
+                  "  pm.sendRequest({ url: `${pm.collectionVariables.get(\"baseUrl\")}/store/order/999000006`, method: \"DELETE\" });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Ожидаемый результат по спецификации Swagger. Тесты падают, пока дефекты не исправлены."
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Response time is below 3000 ms\", () => pm.expect(pm.response.responseTime).to.be.below(3000));"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://petstore.swagger.io/v2"
+    },
+    {
+      "key": "petId",
+      "value": ""
+    },
+    {
+      "key": "petName",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    }
+  ]
+}

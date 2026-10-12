@@ -1,0 +1,50 @@
+name: API tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "api-tests/**"
+      - ".github/workflows/api-tests.yml"
+  pull_request:
+    paths:
+      - "api-tests/**"
+  schedule:
+    # Every Monday at 06:00 UTC: the public stand can change, so the suite is rerun weekly
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run working-behaviour folders
+        run: >
+          npx --yes newman@6.2.1 run api-tests/petstore.postman_collection.json
+          --folder "1. Pet CRUD"
+          --folder "2. Store"
+          --folder "3. Negative"
+          --reporters cli,junit
+          --reporter-junit-export results/api-tests.xml
+
+      - name: Run known defects (expected to fail, does not fail the build)
+        if: always()
+        continue-on-error: true
+        run: >
+          npx --yes newman@6.2.1 run api-tests/petstore.postman_collection.json
+          --folder "4. Known defects"
+          --reporters cli,junit
+          --reporter-junit-export results/known-defects.xml
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-reports
+          path: results/
